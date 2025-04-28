@@ -69,11 +69,6 @@ class RouteController extends Controller
      */
     public function edit(Route $route)
     {
-        // Only admin can edit routes
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         $transports = Transport::all();
         return view('routes.edit', compact('route', 'transports'));
     }
@@ -83,11 +78,6 @@ class RouteController extends Controller
      */
     public function update(Request $request, Route $route)
     {
-        // Only admin can update routes
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         $request->validate([
             'depart' => 'required|date',
             'route_from' => 'required|string|max:255',
@@ -113,11 +103,6 @@ class RouteController extends Controller
      */
     public function destroy(Route $route)
     {
-        // Only admin can delete routes
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         // Check if route has reservations
         if ($route->reservations()->count() > 0) {
             return redirect()->route('routes.index')
@@ -135,14 +120,9 @@ class RouteController extends Controller
      */
     public function adminIndex()
     {
-        // Only admin can view admin routes page
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         $routes = Route::with(['transport.transportType'])
             ->orderBy('depart', 'asc')
-            ->paginate(20);
+            ->paginate(10);
             
         return view('admin.routes.index', compact('routes'));
     }

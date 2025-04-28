@@ -12,12 +12,14 @@ class TransportTypeAPIController extends Controller
 {
     /**
      * Display a listing of the transport types.
+     * Only return airplane transport type.
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $transportTypes = TransportType::all();
+        // Get only Pesawat transport type
+        $transportTypes = TransportType::where('description', 'Pesawat')->get();
         
         return response()->json([
             'success' => true,
@@ -28,6 +30,7 @@ class TransportTypeAPIController extends Controller
 
     /**
      * Store a newly created transport type in storage.
+     * Enforce that only airplane type can be created.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -46,7 +49,11 @@ class TransportTypeAPIController extends Controller
             ], 422);
         }
 
-        $transportType = TransportType::create($validator->validated());
+        // Force description to be 'Pesawat' regardless of input
+        $data = $validator->validated();
+        $data['description'] = 'Pesawat';
+        
+        $transportType = TransportType::create($data);
         
         return response()->json([
             'success' => true,
@@ -57,18 +64,21 @@ class TransportTypeAPIController extends Controller
 
     /**
      * Display the specified transport type.
+     * Only show if it's airplane type.
      *
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
-        $transportType = TransportType::find($id);
+        $transportType = TransportType::where('id_transport_type', $id)
+            ->where('description', 'Pesawat')
+            ->first();
         
         if (!$transportType) {
             return response()->json([
                 'success' => false,
-                'message' => 'Transport type not found'
+                'message' => 'Transport type not found or not an airplane type'
             ], 404);
         }
         
@@ -81,6 +91,7 @@ class TransportTypeAPIController extends Controller
 
     /**
      * Update the specified transport type in storage.
+     * Only allow updates to airplane type and maintain it as airplane.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -88,12 +99,14 @@ class TransportTypeAPIController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $transportType = TransportType::find($id);
+        $transportType = TransportType::where('id_transport_type', $id)
+            ->where('description', 'Pesawat')
+            ->first();
         
         if (!$transportType) {
             return response()->json([
                 'success' => false,
-                'message' => 'Transport type not found'
+                'message' => 'Transport type not found or not an airplane type'
             ], 404);
         }
 
@@ -109,7 +122,9 @@ class TransportTypeAPIController extends Controller
             ], 422);
         }
 
-        $transportType->update($validator->validated());
+        // Force description to remain 'Pesawat'
+        $transportType->description = 'Pesawat';
+        $transportType->save();
         
         return response()->json([
             'success' => true,
@@ -120,19 +135,31 @@ class TransportTypeAPIController extends Controller
 
     /**
      * Remove the specified transport type from storage.
+     * Only allow deletion of non-default airplane types.
      *
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
-        $transportType = TransportType::find($id);
+        $transportType = TransportType::where('id_transport_type', $id)
+            ->where('description', 'Pesawat')
+            ->first();
         
         if (!$transportType) {
             return response()->json([
                 'success' => false,
-                'message' => 'Transport type not found'
+                'message' => 'Transport type not found or not an airplane type'
             ], 404);
+        }
+        
+        // Check if this is the default airplane type
+        $count = TransportType::where('description', 'Pesawat')->count();
+        if ($count <= 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete the default airplane transport type'
+            ], 400);
         }
         
         $transportType->delete();

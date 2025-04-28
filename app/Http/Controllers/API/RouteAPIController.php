@@ -5,19 +5,37 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RouteResource;
 use App\Models\Route;
+use App\Models\TransportType;
+use App\Models\Transport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class RouteAPIController extends Controller
 {
     /**
+     * Get airplane transport IDs.
+     * 
+     * @return array
+     */
+    private function getAirplaneTransportIds()
+    {
+        $airplaneTypeId = TransportType::where('description', 'Pesawat')->first()->id_transport_type;
+        return Transport::where('id_transport_type', $airplaneTypeId)->pluck('id_transport')->toArray();
+    }
+
+    /**
      * Display a listing of the routes.
+     * Only return airplane routes.
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $routes = Route::with(['transport', 'transport.transportType'])->get();
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        
+        $routes = Route::with(['transport', 'transport.transportType'])
+            ->whereIn('id_transport', $airplaneTransportIds)
+            ->get();
         
         return response()->json([
             'success' => true,
@@ -28,6 +46,7 @@ class RouteAPIController extends Controller
 
     /**
      * Store a newly created route in storage.
+     * Only allow creation of airplane routes.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -50,6 +69,15 @@ class RouteAPIController extends Controller
             ], 422);
         }
 
+        // Verify that transport is an airplane
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        if (!in_array($request->id_transport, $airplaneTransportIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The specified transport must be an airplane'
+            ], 400);
+        }
+
         $route = Route::create($validator->validated());
         
         return response()->json([
@@ -61,18 +89,24 @@ class RouteAPIController extends Controller
 
     /**
      * Display the specified route.
+     * Only return if it's an airplane route.
      *
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
-        $route = Route::with(['transport', 'transport.transportType'])->find($id);
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        
+        $route = Route::with(['transport', 'transport.transportType'])
+            ->where('id_route', $id)
+            ->whereIn('id_transport', $airplaneTransportIds)
+            ->first();
         
         if (!$route) {
             return response()->json([
                 'success' => false,
-                'message' => 'Route not found'
+                'message' => 'Route not found or not an airplane route'
             ], 404);
         }
         
@@ -85,6 +119,7 @@ class RouteAPIController extends Controller
 
     /**
      * Update the specified route in storage.
+     * Only allow updates to airplane routes.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -92,12 +127,16 @@ class RouteAPIController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $route = Route::find($id);
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        
+        $route = Route::whereIn('id_transport', $airplaneTransportIds)
+            ->where('id_route', $id)
+            ->first();
         
         if (!$route) {
             return response()->json([
                 'success' => false,
-                'message' => 'Route not found'
+                'message' => 'Route not found or not an airplane route'
             ], 404);
         }
 
@@ -117,6 +156,14 @@ class RouteAPIController extends Controller
             ], 422);
         }
 
+        // If transport is being updated, verify it's an airplane
+        if ($request->has('id_transport') && !in_array($request->id_transport, $airplaneTransportIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The specified transport must be an airplane'
+            ], 400);
+        }
+
         $route->update($validator->validated());
         
         return response()->json([
@@ -128,18 +175,23 @@ class RouteAPIController extends Controller
 
     /**
      * Remove the specified route from storage.
+     * Only allow deletion of airplane routes.
      *
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
-        $route = Route::find($id);
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        
+        $route = Route::whereIn('id_transport', $airplaneTransportIds)
+            ->where('id_route', $id)
+            ->first();
         
         if (!$route) {
             return response()->json([
                 'success' => false,
-                'message' => 'Route not found'
+                'message' => 'Route not found or not an airplane route'
             ], 404);
         }
         
@@ -153,13 +205,17 @@ class RouteAPIController extends Controller
 
     /**
      * Search routes by various criteria.
+     * Only return airplane routes.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function search(Request $request)
     {
-        $query = Route::with(['transport', 'transport.transportType']);
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        
+        $query = Route::with(['transport', 'transport.transportType'])
+            ->whereIn('id_transport', $airplaneTransportIds);
         
         if ($request->has('route_from')) {
             $query->where('route_from', 'like', '%' . $request->route_from . '%');
@@ -174,13 +230,14 @@ class RouteAPIController extends Controller
         }
         
         if ($request->has('transport_id')) {
+            // Verify it's an airplane transport
+            if (!in_array($request->transport_id, $airplaneTransportIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The specified transport must be an airplane'
+                ], 400);
+            }
             $query->where('id_transport', $request->transport_id);
-        }
-        
-        if ($request->has('transport_type_id')) {
-            $query->whereHas('transport', function($q) use ($request) {
-                $q->where('id_transport_type', $request->transport_type_id);
-            });
         }
         
         $routes = $query->get();

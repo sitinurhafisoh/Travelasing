@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Route;
 use App\Models\TransportType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -104,15 +105,19 @@ class HomeController extends Controller
     public function adminDashboard()
     {
         // Check if admin is logged in
-        if (!session('admin_id')) {
+        if (!Auth::check()) {
             return redirect('/admin/login');
         }
         
-        $routes = Route::count();
-        $reservations = \App\Models\Reservation::count();
-        $users = \App\Models\User::count();
+        // Data untuk dashboard
+        $routes = \App\Models\Route::count();
         $transports = \App\Models\Transport::count();
+        $schedules = \App\Models\Schedule::count();
+        $apiRequestCount = 100; // Placeholder, should be replaced with actual API request count
         
-        return view('admin.dashboard', compact('routes', 'reservations', 'users', 'transports'));
+        // Data untuk chart API requests (placeholder data)
+        $apiRequestsData = [15, 25, 35, 45, 55, 40, 30];
+        
+        return view('admin.dashboard', compact('routes', 'transports', 'schedules', 'apiRequestCount', 'apiRequestsData'));
     }
 }

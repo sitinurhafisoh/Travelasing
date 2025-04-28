@@ -5,19 +5,36 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RouteResource;
 use App\Models\Route;
+use App\Models\TransportType;
+use App\Models\Transport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ScheduleAPIController extends Controller
 {
     /**
+     * Get airplane transport IDs.
+     * 
+     * @return array
+     */
+    private function getAirplaneTransportIds()
+    {
+        $airplaneTypeId = TransportType::where('description', 'Pesawat')->first()->id_transport_type;
+        return Transport::where('id_transport_type', $airplaneTypeId)->pluck('id_transport')->toArray();
+    }
+
+    /**
      * Display a listing of all flight schedules.
+     * Only return airplane flight schedules.
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        
         $schedules = Route::with(['transport', 'transport.transportType'])
+            ->whereIn('id_transport', $airplaneTransportIds)
             ->orderBy('depart')
             ->get();
         
@@ -30,18 +47,24 @@ class ScheduleAPIController extends Controller
 
     /**
      * Display the specified flight schedule.
+     * Only return if it's an airplane flight schedule.
      *
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
-        $schedule = Route::with(['transport', 'transport.transportType'])->find($id);
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        
+        $schedule = Route::with(['transport', 'transport.transportType'])
+            ->where('id_route', $id)
+            ->whereIn('id_transport', $airplaneTransportIds)
+            ->first();
         
         if (!$schedule) {
             return response()->json([
                 'success' => false,
-                'message' => 'Flight schedule not found'
+                'message' => 'Flight schedule not found or not an airplane flight'
             ], 404);
         }
         
@@ -54,6 +77,7 @@ class ScheduleAPIController extends Controller
 
     /**
      * Search flight schedules by date range.
+     * Only return airplane flight schedules.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -73,7 +97,10 @@ class ScheduleAPIController extends Controller
             ], 422);
         }
 
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+
         $schedules = Route::with(['transport', 'transport.transportType'])
+            ->whereIn('id_transport', $airplaneTransportIds)
             ->whereBetween('depart', [$request->start_date, $request->end_date])
             ->orderBy('depart')
             ->get();
@@ -87,6 +114,7 @@ class ScheduleAPIController extends Controller
 
     /**
      * Search flight schedules by origin and destination.
+     * Only return airplane flight schedules.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -107,7 +135,10 @@ class ScheduleAPIController extends Controller
             ], 422);
         }
 
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+
         $query = Route::with(['transport', 'transport.transportType'])
+            ->whereIn('id_transport', $airplaneTransportIds)
             ->where('route_from', 'like', '%' . $request->route_from . '%')
             ->where('route_to', 'like', '%' . $request->route_to . '%');
             
@@ -126,6 +157,7 @@ class ScheduleAPIController extends Controller
 
     /**
      * Search flight schedules by airline (maskapai).
+     * Only return airplane flight schedules.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -142,6 +174,16 @@ class ScheduleAPIController extends Controller
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        $airplaneTransportIds = $this->getAirplaneTransportIds();
+        
+        // Verify it's an airplane transport
+        if (!in_array($request->id_transport, $airplaneTransportIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The specified transport must be an airplane'
+            ], 400);
         }
 
         $schedules = Route::with(['transport', 'transport.transportType'])

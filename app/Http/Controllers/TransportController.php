@@ -26,7 +26,7 @@ class TransportController extends Controller
     public function create()
     {
         // Only admin can create transports
-        if (!session('admin_id')) {
+        if (!auth()->check() || !auth()->user()->is_admin) {
             abort(403, 'Unauthorized action.');
         }
         
@@ -40,14 +40,14 @@ class TransportController extends Controller
     public function store(Request $request)
     {
         // Only admin can store transports
-        if (!session('admin_id')) {
+        if (!auth()->check() || !auth()->user()->is_admin) {
             abort(403, 'Unauthorized action.');
         }
         
         $request->validate([
-            'code' => 'required|numeric|unique:transports,code',
+            'code' => 'required|string|max:10|unique:transports,code',
             'description' => 'required|string|max:255',
-            'seat' => 'required|string|max:255',
+            'seat' => 'required|integer',
             'id_transport_type' => 'required|exists:transport_types,id_transport_type',
         ]);
         
@@ -77,7 +77,7 @@ class TransportController extends Controller
     public function edit(Transport $transport)
     {
         // Only admin can edit transports
-        if (!session('admin_id')) {
+        if (!auth()->check() || !auth()->user()->is_admin) {
             abort(403, 'Unauthorized action.');
         }
         
@@ -91,14 +91,14 @@ class TransportController extends Controller
     public function update(Request $request, Transport $transport)
     {
         // Only admin can update transports
-        if (!session('admin_id')) {
+        if (!auth()->check() || !auth()->user()->is_admin) {
             abort(403, 'Unauthorized action.');
         }
         
         $request->validate([
-            'code' => 'required|numeric|unique:transports,code,' . $transport->id_transport . ',id_transport',
+            'code' => 'required|string|max:10|unique:transports,code,' . $transport->id_transport . ',id_transport',
             'description' => 'required|string|max:255',
-            'seat' => 'required|string|max:255',
+            'seat' => 'required|integer',
             'id_transport_type' => 'required|exists:transport_types,id_transport_type',
         ]);
         
@@ -119,7 +119,7 @@ class TransportController extends Controller
     public function destroy(Transport $transport)
     {
         // Only admin can delete transports
-        if (!session('admin_id')) {
+        if (!auth()->check() || !auth()->user()->is_admin) {
             abort(403, 'Unauthorized action.');
         }
         
@@ -140,14 +140,9 @@ class TransportController extends Controller
      */
     public function adminIndex()
     {
-        // Only admin can view admin transports page
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         $transports = Transport::with('transportType')
             ->orderBy('description')
-            ->paginate(20);
+            ->paginate(10);
             
         return view('admin.transports.index', compact('transports'));
     }
@@ -157,32 +152,17 @@ class TransportController extends Controller
      */
     public function typeIndex()
     {
-        // Only admin can view transport types
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
-        $types = TransportType::orderBy('description')->get();
+        $types = TransportType::orderBy('description')->paginate(10);
         return view('admin.transport-types.index', compact('types'));
     }
     
     public function typeCreate()
     {
-        // Only admin can create transport types
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         return view('admin.transport-types.create');
     }
     
     public function typeStore(Request $request)
     {
-        // Only admin can store transport types
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         $request->validate([
             'description' => 'required|string|max:255',
         ]);
@@ -197,21 +177,11 @@ class TransportController extends Controller
     
     public function typeEdit(TransportType $type)
     {
-        // Only admin can edit transport types
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         return view('admin.transport-types.edit', compact('type'));
     }
     
     public function typeUpdate(Request $request, TransportType $type)
     {
-        // Only admin can update transport types
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         $request->validate([
             'description' => 'required|string|max:255',
         ]);
@@ -226,11 +196,6 @@ class TransportController extends Controller
     
     public function typeDestroy(TransportType $type)
     {
-        // Only admin can delete transport types
-        if (!session('admin_id')) {
-            abort(403, 'Unauthorized action.');
-        }
-        
         // Check if type is used in any transports
         if ($type->transports()->count() > 0) {
             return redirect()->route('admin.transport-types.index')

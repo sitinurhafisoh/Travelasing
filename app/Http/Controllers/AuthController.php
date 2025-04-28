@@ -110,15 +110,14 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $admin = \App\Models\Admin::where('username', $credentials['username'])->first();
-        if ($admin && $admin->password === $credentials['password']) {
-            session(['admin_id' => $admin->username]);
+        if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password'], 'is_admin' => true])) {
+            $request->session()->regenerate();
             return redirect('/admin/dashboard');
         }
 
         return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
-        ]);
+            'username' => 'Kredensial yang diberikan tidak cocok dengan catatan kami.',
+        ])->withInput($request->except('password'));
     }
 
     /**
@@ -126,7 +125,9 @@ class AuthController extends Controller
      */
     public function adminLogout(Request $request)
     {
-        session()->forget('admin_id');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect('/admin/login');
     }
 }

@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Mis Reservas - Travelasing')
+@section('title', 'Reservasi Saya - Travelasing')
 
 @section('content')
 <div class="container py-4">
     <div class="row mb-4">
         <div class="col">
-            <h1>Mis Reservas</h1>
-            <p class="lead">Consulta y gestiona todas tus reservas de viaje.</p>
+            <h1>Reservasi Saya</h1>
+            <p class="lead">Lihat dan kelola semua reservasi perjalanan Anda.</p>
         </div>
         <div class="col-auto">
             <a href="{{ route('search') }}" class="btn btn-primary">
-                <i class="fas fa-plus-circle me-2"></i> Nueva Reserva
+                <i class="fas fa-plus-circle me-2"></i> Reservasi Baru
             </a>
         </div>
     </div>
@@ -20,16 +20,16 @@
         <div class="card-header bg-light">
             <div class="row align-items-center">
                 <div class="col">
-                    <h5 class="mb-0">Historial de Reservas</h5>
+                    <h5 class="mb-0">Riwayat Reservasi</h5>
                 </div>
                 <div class="col-auto">
                     <form action="{{ route('reservations.index') }}" method="GET" class="d-flex">
                         <select name="status" class="form-select me-2" onchange="this.form.submit()">
-                            <option value="">Todos los estados</option>
-                            <option value="Proses" {{ request('status') == 'Proses' ? 'selected' : '' }}>En proceso</option>
-                            <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Completado</option>
+                            <option value="">Semua status</option>
+                            <option value="Proses" {{ request('status') == 'Proses' ? 'selected' : '' }}>Sedang diproses</option>
+                            <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                         </select>
-                        <button type="submit" class="btn btn-outline-secondary">Filtrar</button>
+                        <button type="submit" class="btn btn-outline-secondary">Filter</button>
                     </form>
                 </div>
             </div>
@@ -47,13 +47,13 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Código</th>
-                                <th>Ruta</th>
-                                <th>Fecha</th>
-                                <th>Asiento</th>
-                                <th>Precio</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th>Kode</th>
+                                <th>Rute</th>
+                                <th>Tanggal</th>
+                                <th>Kursi</th>
+                                <th>Harga</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -66,32 +66,32 @@
                                     <td>{{ number_format($reservation->price, 0, ',', '.') }}</td>
                                     <td>
                                         @if($reservation->status == 'Proses')
-                                            <span class="badge bg-warning text-dark">En proceso</span>
+                                            <span class="badge bg-warning text-dark">Sedang diproses</span>
                                         @elseif($reservation->status == 'Selesai')
-                                            <span class="badge bg-success">Completado</span>
+                                            <span class="badge bg-success">Selesai</span>
                                         @else
                                             <span class="badge bg-secondary">{{ $reservation->status }}</span>
                                         @endif
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a href="{{ route('reservations.show', $reservation->id_reserv) }}" class="btn btn-outline-primary" title="Ver detalles">
+                                            <a href="{{ route('reservations.show', $reservation->id_reserv) }}" class="btn btn-outline-primary" title="Lihat detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             @if($reservation->status == 'Proses')
-                                                <a href="{{ route('reservations.edit', $reservation->id_reserv) }}" class="btn btn-outline-warning" title="Editar">
+                                                <a href="{{ route('reservations.edit', $reservation->id_reserv) }}" class="btn btn-outline-warning" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <form action="{{ route('reservations.destroy', $reservation->id_reserv) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger" title="Cancelar reserva"
-                                                            onclick="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');">
+                                                    <button type="submit" class="btn btn-outline-danger" title="Batalkan reservasi"
+                                                            onclick="return confirm('Apakah Anda yakin ingin membatalkan reservasi ini?');">
                                                         <i class="fas fa-times"></i>
                                                     </button>
                                                 </form>
                                             @endif
-                                            <a href="{{ route('reservations.print', $reservation->id_reserv) }}" class="btn btn-outline-success" title="Imprimir ticket" target="_blank">
+                                            <a href="{{ route('reservations.print', $reservation->id_reserv) }}" class="btn btn-outline-success" title="Cetak tiket" target="_blank">
                                                 <i class="fas fa-print"></i>
                                             </a>
                                         </div>
@@ -107,8 +107,8 @@
                 </div>
             @else
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i> No tienes reservas que mostrar.
-                    <a href="{{ route('search') }}" class="alert-link">¡Busca y reserva tu primer viaje ahora!</a>
+                    <i class="fas fa-info-circle me-2"></i> Anda tidak memiliki reservasi untuk ditampilkan.
+                    <a href="{{ route('search') }}" class="alert-link">Cari dan pesan perjalanan pertama Anda sekarang!</a>
                 </div>
             @endif
         </div>

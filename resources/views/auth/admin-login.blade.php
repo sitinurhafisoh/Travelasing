@@ -54,8 +54,8 @@
                     </form>
                 </div>
                 <div class="card-footer text-center py-3">
-                    <a href="{{ route('home') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i> Kembali ke Beranda
+                    <a href="{{ route('admin.login') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Kembali
                     </a>
                 </div>
             </div>

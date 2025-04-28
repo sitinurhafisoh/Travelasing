@@ -71,7 +71,7 @@
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="card-title">Maskapai</h5>
-                                    <h3 class="mb-0">{{ $totalTransports ?? 0 }}</h3>
+<h3 class="mb-0">{{ $totalTransports ?? 0 }}</h3>
                                 </div>
                                 <i class="fas fa-plane fa-3x opacity-50"></i>
                             </div>
@@ -122,7 +122,7 @@
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="card-title">API Requests</h5>
-                                    <h3 class="mb-0">{{ $totalApiRequests ?? 0 }}</h3>
+                                    <h3 class="mb-0">{{ $apiRequestCount ?? 0 }}</h3>
                                 </div>
                                 <i class="fas fa-exchange-alt fa-3x opacity-50"></i>
                             </div>

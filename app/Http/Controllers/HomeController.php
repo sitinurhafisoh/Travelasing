@@ -110,14 +110,14 @@ class HomeController extends Controller
         }
         
         // Data untuk dashboard
-        $routes = \App\Models\Route::count();
-        $transports = \App\Models\Transport::count();
-        $schedules = \App\Models\Schedule::count();
-        $apiRequestCount = 100; // Placeholder, should be replaced with actual API request count
-        
+        $totalTransports = \App\Models\Transport::count();
+        $totalRoutes = \App\Models\Route::count();
+        $totalSchedules = \App\Models\Schedule::count();
+        $apiRequestCount = 100; // Ganti dengan model yang sesuai jika nama berbeda
+
         // Data untuk chart API requests (placeholder data)
         $apiRequestsData = [15, 25, 35, 45, 55, 40, 30];
-        
-        return view('admin.dashboard', compact('routes', 'transports', 'schedules', 'apiRequestCount', 'apiRequestsData'));
+
+        return view('admin.dashboard', compact('totalTransports', 'totalRoutes', 'totalSchedules', 'apiRequestCount', 'apiRequestsData'));
     }
 }

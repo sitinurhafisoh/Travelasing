@@ -63,4 +63,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('routes', [RouteAPIController::class, 'store']);
     Route::put('routes/{id}', [RouteAPIController::class, 'update']);
     Route::delete('routes/{id}', [RouteAPIController::class, 'destroy']);
+
 });
+
+
+Route::get('/user/{id}', [AuthController::class, 'show']);

@@ -10,7 +10,7 @@
             <p class="lead">Lihat dan kelola semua reservasi perjalanan Anda.</p>
         </div>
         <div class="col-auto">
-            <a href="{{ route('search') }}" class="btn btn-primary">
+            <a href="{{ route('search.form') }}" class="btn btn-primary">
                 <i class="fas fa-plus-circle me-2"></i> Reservasi Baru
             </a>
         </div>
@@ -108,7 +108,7 @@
             @else
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i> Anda tidak memiliki reservasi untuk ditampilkan.
-                    <a href="{{ route('search') }}" class="alert-link">Cari dan pesan perjalanan pertama Anda sekarang!</a>
+                    <a href="{{ route('search.form') }}" class="alert-link">Cari dan pesan perjalanan pertama Anda sekarang!</a>
                 </div>
             @endif
         </div>

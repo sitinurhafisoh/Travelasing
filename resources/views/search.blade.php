@@ -35,8 +35,8 @@
                         <label for="depart_date" class="form-label">Tanggal Keberangkatan</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                            <input type="date" class="form-control" id="depart_date" name="depart_date" 
-                                value="{{ request('depart_date', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
+                            <input type="date" class="form-control" id="depart" name="depart" 
+                                value="{{ request('depart', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
                         </div>
                     </div>
                     <div class="col-md-6">

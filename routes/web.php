@@ -10,7 +10,32 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ApiDocumentationController;
 
 // Public routes - Redirect to admin login
-Route::redirect('/', '/admin/login');
+Route::redirect('/', '/dashboard');
+
+//Customer Authentication routes
+// Register (Pendaftaran pengguna)
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::get('/dashboard', function () {
+    return view('dashboard'); // atau arahkan ke controller jika perlu
+})->middleware('auth');
+
+Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+Route::get('/search', [HomeController::class, 'searchForm'])->name('search.form');
+Route::get('/search-results', [HomeController::class, 'search'])->name('search.results');
+
+Route::get('/routes', [RouteController::class, 'index'])->name('routes.index');
+Route::get('/reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
+Route::post('/reservations/store', [ReservationController::class, 'store'])->name('reservations.store');
+
+Route::prefix('reservations')->middleware('auth')->group(function () {
+    Route::get('/', [ReservationController::class, 'index'])->name('reservations.index');
+    Route::get('/{id}', [ReservationController::class, 'show'])->name('reservations.show');
+    Route::get('/{id}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
+    Route::put('/{id}', [ReservationController::class, 'update'])->name('reservations.update');
+    Route::delete('/{id}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    Route::get('/{id}/print', [ReservationController::class, 'print'])->name('reservations.print');
+});
 
 // Authentication routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

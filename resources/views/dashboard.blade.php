@@ -39,7 +39,7 @@
                     <i class="fas fa-search fa-3x opacity-50"></i>
                 </div>
                 <div class="card-footer bg-info border-top-0">
-                    <a href="{{ route('search') }}" class="text-white text-decoration-none">
+                    <a href="{{ route('search.form') }}" class="text-white text-decoration-none">
                         Cari sekarang <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -132,7 +132,7 @@
                         </div>
                     @else
                         <div class="alert alert-info">
-                            Anda tidak memiliki reservasi terbaru. <a href="{{ route('search') }}" class="alert-link">Cari penerbangan pertama Anda sekarang!</a>
+                            Anda tidak memiliki reservasi terbaru. <a href="{{ route('search.form') }}" class="alert-link">Cari penerbangan pertama Anda sekarang!</a>
                         </div>
                     @endif
                 </div>
@@ -177,7 +177,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('search') }}" class="btn btn-primary">
+                        <a href="{{ route('search.form') }}" class="btn btn-primary">
                             <i class="fas fa-search me-2"></i> Cari Penerbangan
                         </a>
                         <a href="{{ route('routes.index') }}" class="btn btn-outline-secondary">

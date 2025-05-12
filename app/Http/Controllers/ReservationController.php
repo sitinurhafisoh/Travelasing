@@ -36,7 +36,7 @@ class ReservationController extends Controller
         shuffle($digits);
         $reservCode = implode('', array_slice($digits, 0, 9));
         
-        return view('reservations.create', compact('route', 'reservCode'));
+        return view('reservations.index', compact('route', 'reservCode'));
     }
 
     /**

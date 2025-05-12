@@ -7,10 +7,10 @@
     <div class="row mb-4">
         <div class="col">
             <h1>Hasil Pencarian</h1>
-            <p class="lead">Menemukan tiket dari {{ $routeFrom }} ke {{ $routeTo }}</p>
+            <p class="lead">Menemukan tiket dari {{ request('route_From') }} ke {{ request('route_To') }}</p>
         </div>
         <div class="col-auto">
-            <a href="{{ route('search') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('search.form') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-search me-2"></i>Pencarian Baru
             </a>
         </div>
@@ -25,22 +25,23 @@
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label for="route_from" class="form-label">Dari</label>
-                        <input type="text" class="form-control" id="route_from" name="route_from" value="{{ $routeFrom }}" required>
+                        <input type="text" class="form-control" id="route_from" name="route_from" value="{{ request('route_From') }}" required>
                     </div>
                     <div class="col-md-3">
                         <label for="route_to" class="form-label">Ke</label>
-                        <input type="text" class="form-control" id="route_to" name="route_to" value="{{ $routeTo }}" required>
+                        <input type="text" class="form-control" id="route_to" name="route_to" value="{{ request('route_To') }}" required>
                     </div>
                     <div class="col-md-3">
                         <label for="depart_date" class="form-label">Tanggal</label>
-                        <input type="date" class="form-control" id="depart_date" name="depart_date" value="{{ $departDate ?? date('Y-m-d') }}" required>
+                        <input type="date" class="form-control" id="depart_date" name="depart_date" value="{{ request('depart') }}
+?? date('Y-m-d') }}" required>
                     </div>
                     <div class="col-md-3">
                         <label for="transport_type" class="form-label">Jenis Transportasi</label>
                         <select class="form-select" id="transport_type" name="transport_type">
                             <option value="">Semua Jenis</option>
                             @foreach($transportTypes as $type)
-                            <option value="{{ $type->id_type_trans }}" {{ $transportType == $type->id_type_trans ? 'selected' : '' }}>
+                            <option value="{{ $type->id_type_trans }}" {{ request('transport_type') == $type->id_type_trans ? 'selected' : '' }}>
                                 {{ $type->description }}
                             </option>
                             @endforeach
@@ -60,7 +61,7 @@
         <div class="row mb-3">
             <div class="col-md-12">
                 <div class="alert alert-success">
-                    <i class="fas fa-info-circle me-2"></i>Ditemukan {{ count($routes) }} rute tersedia untuk tanggal {{ \Carbon\Carbon::parse($departDate)->format('d/m/Y') }}
+                    <i class="fas fa-info-circle me-2"></i>Ditemukan {{ count($routes) }} rute tersedia untuk tanggal {{ \Carbon\Carbon::parse (request('depart')) ->format('d/m/Y') }}
                 </div>
             </div>
         </div>
@@ -113,9 +114,10 @@
                                     <h6 class="text-muted mb-2">Harga per orang</h6>
                                     <h4 class="text-primary mb-3">Rp {{ number_format($route->price, 0, ',', '.') }}</h4>
                                     <div class="d-grid">
-                                        <a href="{{ route('reservations.create', ['route_id' => $route->id_route]) }}" class="btn btn-primary">
-                                            <i class="fas fa-ticket-alt me-2"></i>Pesan Sekarang
-                                        </a>
+                                    <a href="http://localhost:8001/ticketing/form?route_id={{ $route->id_route }}&transport={{ $route->transport->description }}&from={{ $route->route_from }}&to={{ $route->route_to }}&departure={{ $route->depart }}&price={{ $route->price }}" class="btn btn-primary">
+                                        <i class="fas fa-ticket-alt me-2"></i>Pesan Sekarang
+                                    </a>
+
                                     </div>
                                 </div>
                             </div>
@@ -143,7 +145,7 @@
                                     <h6>Informasi Transportasi</h6>
                                     <p><strong>Deskripsi:</strong> {{ $route->transport->description }}</p>
                                     <p><strong>Tipe:</strong> {{ $route->transport->transportType->description }}</p>
-                                    <p><strong>Kode:</strong> {{ $route->transport->trans_code }}</p>
+                                    <p><strong>Kode:</strong> {{ $route->transport->code }}</p>
                                     <p><strong>Kapasitas:</strong> {{ $route->transport->seat }} kursi</p>
                                 </div>
                                 <div class="col-md-6">
@@ -165,9 +167,9 @@
             <div class="card-body text-center py-5">
                 <img src="https://img.icons8.com/fluency/96/000000/nothing-found.png" alt="No results" class="mb-3">
                 <h3>Maaf, Tidak Ada Rute yang Tersedia</h3>
-                <p class="lead">Tidak ada rute perjalanan yang ditemukan dari {{ $routeFrom }} ke {{ $routeTo }} untuk tanggal yang dipilih.</p>
+                <p class="lead">Tidak ada rute perjalanan yang ditemukan dari {{ request('route_From') }} ke {{ request('route_To') }} untuk tanggal yang dipilih.</p>
                 <div class="mt-4">
-                    <a href="{{ route('search') }}" class="btn btn-primary">
+                    <a href="{{ route('search.form') }}" class="btn btn-primary">
                         <i class="fas fa-search me-2"></i>Coba Pencarian Lain
                     </a>
                 </div>
